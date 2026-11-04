@@ -97,6 +97,8 @@ p{margin:0}
 .steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;font-size:13px;flex-wrap:wrap}
 .steps li{padding:5px 12px;border-radius:999px;color:var(--ink-soft);box-shadow:inset 0 0 0 1px var(--rule);font-variant-numeric:tabular-nums}
 .steps li[aria-current="step"]{background:var(--ink);color:var(--wall);box-shadow:none}
+.steps li.done{cursor:pointer;color:var(--ink)}
+.steps li.done:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
 .step-head{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;max-width:60ch}
 .step-head .kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
 .step-head h2{font-family:var(--f-kr);font-size:clamp(24px,3.4vw,32px);line-height:1.35}
@@ -133,6 +135,22 @@ p{margin:0}
 .bar-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:26px;padding-top:18px;border-top:1px solid var(--rule)}
 .status{font-size:13.5px;color:var(--ink-soft)}
 .status.warn{color:var(--poppy)}
+.shot .acts{display:flex;gap:12px}
+/* crop */
+.crop-dlg{border:0;padding:0;border-radius:10px;background:var(--paper);color:var(--ink);width:min(680px, calc(100vw - 24px));max-height:calc(100svh - 24px);overflow:auto}
+.crop-dlg::backdrop{background:rgba(20,24,22,.6)}
+.crop-inner{display:flex;flex-direction:column;gap:14px;padding:18px}
+.crop-head strong{font-family:var(--f-kr);font-size:20px;display:block}
+.crop-head span{font-size:13.5px;color:var(--ink-soft)}
+.crop-stage{display:flex;justify-content:center;background:var(--wall-2);border-radius:6px;padding:12px}
+.crop-stage canvas{display:block;touch-action:none;cursor:grab;box-shadow:0 0 0 1px var(--rule)}
+.crop-stage canvas:active{cursor:grabbing}
+.crop-ratios{display:flex;gap:6px;flex-wrap:wrap}
+.crop-ratio[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.crop-zoom{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-soft)}
+.crop-zoom input{flex:1;min-width:0;accent-color:var(--poppy)}
+.crop-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.crop-actions .grow{flex:1}
 
 /* painting progress */
 .easel{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 0}
@@ -270,6 +288,7 @@ p{margin:0}
           <button class="chip" type="button">저녁 러닝 코스</button>
         </div>
         <div class="row" style="justify-content:space-between">
+          <button class="btn btn-ghost" id="toHall" type="button">처음으로</button>
           <span class="counter" id="goalCount">0 / 30</span>
           <button class="btn btn-poppy" id="toStep2" disabled>다음: 빛 기록하기</button>
         </div>
@@ -372,6 +391,7 @@ p{margin:0}
       </div>
       <div class="final-actions">
         <button class="btn btn-poppy" id="save" hidden>연작 이미지로 저장</button>
+        <button class="btn btn-ghost" id="reSign" type="button">서명 다시 하기</button>
         <button class="btn btn-ghost" id="addMore" type="button">사진 더 추가하기</button>
         <button class="btn btn-ghost" id="restart" type="button">새 연작 시작하기</button>
       </div>
@@ -379,6 +399,26 @@ p{margin:0}
     </section>
   </div>
 </div>
+
+<dialog class="crop-dlg" id="cropDlg" aria-labelledby="cropTitle">
+  <div class="crop-inner">
+    <div class="crop-head"><strong id="cropTitle">사진 자르기</strong><span>사진을 끌어서 위치를, 아래 막대로 크기를 맞춰 주세요.</span></div>
+    <div class="crop-stage" id="cropStage"><canvas id="cropCanvas" aria-label="자를 영역 미리보기"></canvas></div>
+    <div class="crop-ratios" role="group" aria-label="비율">
+      <button class="chip crop-ratio" type="button" data-r="orig">원본</button>
+      <button class="chip crop-ratio" type="button" data-r="4:3">4:3</button>
+      <button class="chip crop-ratio" type="button" data-r="1:1">1:1</button>
+      <button class="chip crop-ratio" type="button" data-r="3:4">3:4</button>
+    </div>
+    <label class="crop-zoom">확대 <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1"></label>
+    <div class="crop-actions">
+      <button class="btn btn-ghost" id="cropReset" type="button">원래대로</button>
+      <span class="grow"></span>
+      <button class="btn btn-ghost" id="cropCancel" type="button">취소</button>
+      <button class="btn btn-poppy" id="cropApply" type="button">적용</button>
+    </div>
+  </div>
+</dialog>
 
 <script>
 (() => {
@@ -414,6 +454,8 @@ p{margin:0}
     for (const s of ["step1","step2","painting","sign","step3"]) $("#"+s).hidden = s !== id;
     const map = { step1:1, step2:2, painting:2, sign:3, step3:4 };
     [1,2,3,4].forEach(n => { const li = $("#st"+n); if(map[id]===n) li.setAttribute("aria-current","step"); else li.removeAttribute("aria-current"); });
+    const cur = map[id];
+    [1,2,3,4].forEach(n => { const li = $("#st"+n), can = n < cur && id !== "painting"; li.classList.toggle("done", can); li.tabIndex = can ? 0 : -1; if(can){ li.setAttribute("role","button"); li.setAttribute("aria-label", `${li.textContent} 단계로 돌아가기`); } else { li.removeAttribute("role"); li.removeAttribute("aria-label"); } });
     window.scrollTo({top:0, behavior: reduced ? "auto" : "smooth"});
   }
 
@@ -429,6 +471,15 @@ p{margin:0}
   document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { goal.value = c.textContent; syncGoal(); goal.focus(); }));
   $("#toStep2").addEventListener("click", () => { if(!state.goal) return; show("step2"); });
   $("#back1").addEventListener("click", () => show("step1"));
+  function goStep(n){
+    if(!$("#st"+n).classList.contains("done")) return;
+    stopPlay();
+    if(n === 1) show("step1");
+    else if(n === 2) show("step2");
+    else if(n === 3 && state.painted.length){ show("sign"); drawSignPreview(); }
+  }
+  [1,2,3,4].forEach(n => { const li = $("#st"+n); li.addEventListener("click", () => goStep(n)); li.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); goStep(n); } }); });
+  $("#toHall").addEventListener("click", () => { $("#app").hidden = true; hall.hidden = false; hall.classList.remove("off","dawn","flicker"); window.scrollTo(0,0); });
 
   /* ---------- EXIF date ---------- */
   function readExifDate(buf){
@@ -538,7 +589,10 @@ p{margin:0}
       const no = document.createElement("span"); no.className = "no"; no.textContent = `No. ${i+1} · ${effect(it.date).ko}`;
       const rm = document.createElement("button"); rm.className = "rm"; rm.type = "button"; rm.textContent = "빼기";
       rm.addEventListener("click", () => { state.items = state.items.filter(x => x !== it); renderShots(); });
-      foot.append(no, rm);
+      const cr = document.createElement("button"); cr.className = "rm"; cr.type = "button"; cr.textContent = "자르기";
+      cr.addEventListener("click", () => openCrop(it));
+      const acts = document.createElement("span"); acts.className = "acts"; acts.append(cr, rm);
+      foot.append(no, acts);
       el.append(img, lab, inp, foot); box.appendChild(el);
     });
     const n = state.items.length, st = $("#shotStatus");
@@ -547,6 +601,79 @@ p{margin:0}
     $("#paint").disabled = n < MIN;
     drop.hidden = n >= MAX;
   }
+
+  /* ---------- crop ---------- */
+  const dlg = $("#cropDlg"), cc = $("#cropCanvas"), ccx = cc.getContext("2d"), zoomEl = $("#cropZoom");
+  const crop = { it: null, img: null, ratio: 1, ratioKey: "orig", zoom: 1, px: 0, py: 0, W: 0, H: 0, scale: 1 };
+  const RATIOS = { "4:3": 4/3, "1:1": 1, "3:4": 3/4 };
+  function cropLayout(){
+    const stage = $("#cropStage");
+    const maxW = Math.min(Math.max(200, stage.clientWidth - 24), 640), maxH = Math.max(220, Math.round(window.innerHeight * 0.5));
+    let W = maxW, H = W / crop.ratio; if(H > maxH){ H = maxH; W = H * crop.ratio; }
+    crop.W = Math.round(W); crop.H = Math.round(H);
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cc.width = Math.round(crop.W * dpr); cc.height = Math.round(crop.H * dpr);
+    cc.style.width = crop.W + "px"; cc.style.height = crop.H + "px";
+    ccx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function cropClamp(){
+    const iw = crop.img.naturalWidth, ih = crop.img.naturalHeight;
+    crop.scale = Math.max(crop.W / iw, crop.H / ih) * crop.zoom;
+    const mx = Math.max(0, (iw * crop.scale - crop.W) / 2), my = Math.max(0, (ih * crop.scale - crop.H) / 2);
+    crop.px = Math.max(-mx, Math.min(mx, crop.px)); crop.py = Math.max(-my, Math.min(my, crop.py));
+  }
+  function cropRect(){
+    const iw = crop.img.naturalWidth, ih = crop.img.naturalHeight, s = crop.scale;
+    const dx = crop.W / 2 - iw * s / 2 + crop.px, dy = crop.H / 2 - ih * s / 2 + crop.py;
+    return { sx: -dx / s, sy: -dy / s, sw: crop.W / s, sh: crop.H / s };
+  }
+  function cropDraw(){
+    if(!crop.img) return;
+    cropClamp(); const r = cropRect();
+    ccx.clearRect(0, 0, crop.W, crop.H);
+    ccx.drawImage(crop.img, r.sx, r.sy, r.sw, r.sh, 0, 0, crop.W, crop.H);
+    ccx.strokeStyle = "rgba(255,255,255,.55)"; ccx.lineWidth = 1; ccx.beginPath();
+    for(let k = 1; k < 3; k++){ ccx.moveTo(crop.W * k / 3, 0); ccx.lineTo(crop.W * k / 3, crop.H); ccx.moveTo(0, crop.H * k / 3); ccx.lineTo(crop.W, crop.H * k / 3); }
+    ccx.stroke();
+  }
+  function setRatio(key){
+    crop.ratioKey = key;
+    crop.ratio = key === "orig" ? crop.img.naturalWidth / crop.img.naturalHeight : RATIOS[key];
+    document.querySelectorAll(".crop-ratio").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.r === key)));
+    cropLayout(); cropDraw();
+  }
+  function openCrop(it){
+    crop.it = it; crop.img = it.orig ? it.orig.img : it.img;
+    crop.zoom = 1; crop.px = 0; crop.py = 0; zoomEl.value = "1";
+    $("#cropReset").disabled = !it.orig;
+    if(typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+    setRatio(state.lastRatio || "orig");
+  }
+  function closeCrop(){ if(typeof dlg.close === "function" && dlg.open) dlg.close(); else dlg.removeAttribute("open"); crop.it = null; }
+  let drag = null;
+  cc.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, px: crop.px, py: crop.py }; try{ cc.setPointerCapture(e.pointerId); }catch(_){} });
+  cc.addEventListener("pointermove", e => { if(!drag) return; crop.px = drag.px + (e.clientX - drag.x); crop.py = drag.py + (e.clientY - drag.y); cropDraw(); });
+  ["pointerup","pointercancel"].forEach(ev => cc.addEventListener(ev, () => { drag = null; }));
+  cc.addEventListener("wheel", e => { e.preventDefault(); crop.zoom = Math.min(3, Math.max(1, crop.zoom * (e.deltaY < 0 ? 1.06 : 1 / 1.06))); zoomEl.value = String(crop.zoom); cropDraw(); }, { passive: false });
+  zoomEl.addEventListener("input", () => { crop.zoom = +zoomEl.value; cropDraw(); });
+  document.querySelectorAll(".crop-ratio").forEach(b => b.addEventListener("click", () => { crop.px = 0; crop.py = 0; setRatio(b.dataset.r); }));
+  window.addEventListener("resize", () => { if(crop.it){ cropLayout(); cropDraw(); } });
+  dlg.addEventListener("cancel", () => { crop.it = null; });
+  $("#cropCancel").addEventListener("click", closeCrop);
+  $("#cropReset").addEventListener("click", () => {
+    const it = crop.it; if(it && it.orig){ it.img = it.orig.img; it.url = it.orig.url; delete it.orig; }
+    closeCrop(); renderShots(); toast("원래 사진으로 되돌렸어요.");
+  });
+  $("#cropApply").addEventListener("click", async () => {
+    const it = crop.it; if(!it) return;
+    const r = cropRect(), k = Math.min(1, 2400 / Math.max(r.sw, r.sh));
+    const out = document.createElement("canvas"); out.width = Math.max(2, Math.round(r.sw * k)); out.height = Math.max(2, Math.round(r.sh * k));
+    out.getContext("2d").drawImage(crop.img, r.sx, r.sy, r.sw, r.sh, 0, 0, out.width, out.height);
+    const url = out.toDataURL("image/jpeg", .92), img = await loadImage(url);
+    if(!it.orig) it.orig = { img: it.img, url: it.url };
+    it.img = img; it.url = url; state.lastRatio = crop.ratioKey;
+    closeCrop(); renderShots();
+  });
 
   /* ---------- sample series (synthetic Giverny haystack field) ---------- */
   function sampleScene(kind){
@@ -870,6 +997,7 @@ p{margin:0}
   });
 
   $("#addMore").addEventListener("click", () => { stopPlay(); show("step2"); });
+  $("#reSign").addEventListener("click", () => { stopPlay(); show("sign"); drawSignPreview(); });
   $("#restart").addEventListener("click", () => {
     stopPlay(); state.items = []; state.painted = []; state.sample = false; goal.value = ""; syncGoal(); renderShots(); selectTab("wall"); show("step1"); goal.focus();
   });
