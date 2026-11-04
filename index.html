@@ -1,0 +1,879 @@
+<!doctype html><html lang="ko"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Seize your light</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600;1,700&family=Nanum+Pen+Script&family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: a single museum room — fluorescent study hall first, then a sage gallery wall where the user's series hangs. */
+:root{
+  --wall:#E6E8E1;      /* pale Giverny sage-grey wall */
+  --wall-2:#DCDFD6;
+  --paper:#F5F5F0;
+  --ink:#20282B;
+  --ink-soft:#56605F;
+  --rule:#C3C8BE;
+  --poppy:#B9412C;     /* Coquelicots red */
+  --poppy-ink:#FFFFFF;
+  --water:#3E6170;     /* water-lily blue */
+  --frame:#8A7A5C;
+  --focus:#3E6170;
+  --f-display:"Cormorant Garamond", "Didot", "Times New Roman", serif;
+  --f-kr:"Gowun Batang", "Nanum Myeongjo", "Batang", serif;
+  --f-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --wall:#181D1C; --wall-2:#202726; --paper:#232A29; --ink:#E5E8E1; --ink-soft:#A3ACA8;
+    --rule:#384240; --poppy:#E06A51; --poppy-ink:#1A1412; --water:#8DB2C0; --frame:#B9A57E; --focus:#8DB2C0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --wall:#181D1C; --wall-2:#202726; --paper:#232A29; --ink:#E5E8E1; --ink-soft:#A3ACA8;
+  --rule:#384240; --poppy:#E06A51; --poppy-ink:#1A1412; --water:#8DB2C0; --frame:#B9A57E; --focus:#8DB2C0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--wall);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 56px}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:4px}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+
+/* ---------- Intro: the study hall ---------- */
+.hall{position:relative;overflow:hidden;border-radius:6px;min-height:min(620px, 82svh);display:grid;grid-template-rows:auto 1fr auto;
+  background:#EEF3F5;color:#26323A;transition:background-color .6s ease}
+.ceiling{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(8px,2vw,18px);padding:22px clamp(16px,4vw,40px) 0}
+.panel{height:clamp(14px,2.4vw,22px);border-radius:3px;background:#FFFFFF;box-shadow:0 0 18px 4px rgba(214,236,255,.95),0 0 2px rgba(150,180,200,.6);transition:background-color .35s ease, box-shadow .35s ease}
+.hall-body{display:flex;flex-direction:column;justify-content:center;gap:14px;padding:28px clamp(16px,5vw,64px)}
+.hall .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5B6B74}
+.hall h1{font-family:var(--f-kr);font-weight:700;font-size:clamp(24px,4.6vw,44px);line-height:1.3;word-break:keep-all}
+.hall h1 .nb{white-space:nowrap}
+.hall .lede{max-width:46ch;color:#44525A;font-size:16px}
+.desks{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;padding:0 clamp(16px,4vw,40px) 22px}
+.desk{height:10px;border-radius:2px;background:#C9D4DA}
+.switch-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:10px}
+.switch{appearance:none;border:0;cursor:pointer;width:64px;height:96px;border-radius:10px;background:#FAFCFD;box-shadow:inset 0 0 0 1px #B8C6CE,0 6px 14px rgba(40,60,70,.12);position:relative;padding:0}
+.switch::before{content:"";position:absolute;left:14px;right:14px;top:12px;height:38px;border-radius:6px;background:#E3EAEE;box-shadow:inset 0 -3px 0 #C3CFD6;transition:transform .25s ease}
+.switch::after{content:"ON";position:absolute;left:0;right:0;bottom:12px;text-align:center;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:#6E7E87}
+.switch-hint{font-family:var(--f-mono);font-size:12.5px;color:#5B6B74}
+
+/* lights off */
+.hall.off{background:#22282C;color:#DDE3E6}
+.hall.off .panel{background:#2E363B;box-shadow:none}
+.hall.off .desk{background:#30383D}
+.hall.off .switch::before{transform:translateY(32px)}
+.hall.off .switch::after{content:"OFF"}
+/* the flowing light */
+.dawn-layer{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 1.6s ease;
+  background:linear-gradient(115deg,#2B3A67 0%,#7A6FA8 14%,#E7A6A1 28%,#F4D48A 42%,#9CC4D6 56%,#F2B07A 70%,#C7543D 84%,#2B3A67 100%);background-size:400% 400%;animation:flow 26s linear infinite}
+@keyframes flow{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.hall.dawn .dawn-layer{opacity:1}
+.hall .before{display:flex;flex-direction:column;gap:14px}
+.hall .after{display:none;position:relative;z-index:1}
+.hall.dawn .before{display:none}
+.hall.dawn .after{display:flex}
+.hall.dawn .ceiling,.hall.dawn .desks{opacity:0;transition:opacity .8s ease}
+.after{flex-direction:column;gap:16px;color:#1C1A22}
+.after .wordmark{font-family:"Cormorant Garamond", var(--f-display);font-style:italic;font-weight:700;font-size:clamp(44px,9vw,98px);line-height:1.02;letter-spacing:0;color:#FFFFFF;text-shadow:0 2px 18px rgba(28,26,34,.5),0 1px 3px rgba(28,26,34,.45)}
+.after p{max-width:44ch;font-size:16.5px;font-family:var(--f-kr)}
+.flicker{animation:flick .7s steps(1) 1}
+@keyframes flick{0%{opacity:1}12%{opacity:.25}20%{opacity:1}34%{opacity:.4}46%{opacity:1}60%{opacity:.15}100%{opacity:1}}
+
+.btn{appearance:none;border:0;cursor:pointer;border-radius:999px;padding:11px 22px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:8px;transition:transform .15s ease, background-color .2s ease}
+.btn:active{transform:translateY(1px)}
+.btn-poppy{background:var(--poppy);color:var(--poppy-ink)}
+.btn-poppy:disabled{opacity:.4;cursor:not-allowed}
+.btn-dark{background:#1C1A22;color:#FFF7EE}
+.btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
+.btn-ghost:hover{background:var(--wall-2)}
+.linkish{appearance:none;background:none;border:0;padding:0;color:var(--water);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:14px}
+
+/* ---------- App chrome ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--rule);margin-bottom:28px}
+.topbar .mark{font-family:var(--f-display);font-style:italic;font-weight:700;font-size:30px;line-height:1}
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;font-size:13px;flex-wrap:wrap}
+.steps li{padding:5px 12px;border-radius:999px;color:var(--ink-soft);box-shadow:inset 0 0 0 1px var(--rule);font-variant-numeric:tabular-nums}
+.steps li[aria-current="step"]{background:var(--ink);color:var(--wall);box-shadow:none}
+.step-head{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;max-width:60ch}
+.step-head .kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.step-head h2{font-family:var(--f-kr);font-size:clamp(24px,3.4vw,32px);line-height:1.35}
+.step-head p{color:var(--ink-soft)}
+
+/* goal */
+.goal-box{display:flex;flex-direction:column;gap:14px;max-width:640px}
+.goal-input{width:100%;background:var(--paper);border:0;border-bottom:2px solid var(--ink);padding:14px 4px;font-family:var(--f-kr);font-size:clamp(20px,3vw,26px);border-radius:4px 4px 0 0}
+.goal-input::placeholder{color:var(--ink-soft);opacity:.7}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{appearance:none;border:0;cursor:pointer;background:var(--paper);box-shadow:inset 0 0 0 1px var(--rule);border-radius:999px;padding:6px 14px;font-size:13.5px}
+.chip:hover{box-shadow:inset 0 0 0 1px var(--ink)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.counter{font-family:var(--f-mono);font-size:12px;color:var(--ink-soft)}
+
+/* upload */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;border:1.5px dashed var(--rule);border-radius:8px;padding:34px 18px;background:var(--paper);cursor:pointer;transition:border-color .2s, background-color .2s}
+.drop{position:relative}
+.file-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+.drop.over{border-color:var(--poppy);background:var(--wall-2)}
+.drop strong{font-family:var(--f-kr);font-size:19px}
+.drop span{color:var(--ink-soft);font-size:14px}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 22px;margin:18px 0 6px;padding:0;list-style:none;color:var(--ink-soft);font-size:13.5px}
+.tips li{padding-left:16px;position:relative}
+.tips li::before{content:"";position:absolute;left:0;top:.68em;width:7px;height:7px;border-radius:50%;background:var(--poppy)}
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:22px}
+.shot{display:flex;flex-direction:column;gap:8px;background:var(--paper);padding:10px;border-radius:6px;min-width:0}
+.shot img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;display:block;background:var(--wall-2)}
+.shot label{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft)}
+.shot input{width:100%;min-width:0;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:3px 0;font-family:var(--f-mono);font-size:12.5px}
+.shot .shot-foot{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.shot .no{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.shot .rm{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink-soft);font-size:12.5px;text-decoration:underline;padding:0}
+.bar-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:26px;padding-top:18px;border-top:1px solid var(--rule)}
+.status{font-size:13.5px;color:var(--ink-soft)}
+.status.warn{color:var(--poppy)}
+
+/* painting progress */
+.easel{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 0}
+.easel canvas{max-width:min(100%,560px);height:auto;border-radius:2px;box-shadow:0 0 0 10px var(--paper),0 0 0 11px var(--rule)}
+.easel p{font-family:var(--f-mono);font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+/* signature */
+.sign-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:720px){.sign-grid{grid-template-columns:1fr}}
+.sign-preview{padding:10px;background:linear-gradient(135deg,#b49d6f,var(--frame) 40%,#6e5f42);box-shadow:0 10px 22px rgba(20,24,22,.22)}
+.sign-preview canvas{display:block;width:100%;height:auto}
+.sign-form{display:flex;flex-direction:column;gap:14px}
+.sign-label{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);padding:0}
+.sig-input{font-family:"Nanum Pen Script",var(--f-kr);font-size:34px;padding:8px 4px}
+.sig-colors{border:0;margin:0;padding:0;display:flex;gap:10px;flex-wrap:wrap}
+.sig-colors legend{margin-bottom:8px}
+.sig-opt{position:relative;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--rule);cursor:pointer;font-size:14px}
+.sig-opt:has(input:checked){box-shadow:inset 0 0 0 2px var(--ink)}
+.sig-opt:has(input:focus-visible){outline:2px solid var(--focus);outline-offset:2px}
+.sig-opt input{position:absolute;opacity:0;width:1px;height:1px}
+.sw{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
+.sw-black{background:#15120F}.sw-white{background:#F8F5EE}
+
+/* series */
+.series-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.series-head h2{font-family:var(--f-kr);font-size:clamp(26px,4vw,40px);line-height:1.25}
+.series-head .meta{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-soft);margin-top:6px}
+.tabs{display:inline-flex;padding:4px;border-radius:999px;background:var(--wall-2)}
+.tab{appearance:none;border:0;background:transparent;cursor:pointer;padding:8px 16px;border-radius:999px;font-size:14px;color:var(--ink-soft)}
+.tab[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:34px 26px;padding:30px clamp(8px,2vw,28px);background:var(--wall-2);border-radius:6px}
+.work{display:flex;flex-direction:column;gap:12px;min-width:0}
+.work .frame{padding:9px;background:linear-gradient(135deg,#b49d6f,var(--frame) 40%,#6e5f42);box-shadow:0 10px 22px rgba(20,24,22,.22)}
+.work canvas{display:block;width:100%;height:auto;outline:1px solid rgba(0,0,0,.25)}
+.label{background:var(--paper);padding:9px 11px;border-radius:2px;font-size:13px;line-height:1.5;max-width:100%}
+.label .t{font-family:var(--f-kr);font-weight:700;font-size:14.5px;display:block}
+.label .e{font-family:var(--f-display);font-style:italic;font-weight:600;font-size:14.5px;color:var(--ink-soft)}
+.label .n{font-family:var(--f-mono);font-size:11px;color:var(--ink-soft);display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+
+.timeview{display:flex;flex-direction:column;gap:16px;align-items:center;background:var(--wall-2);border-radius:6px;padding:28px clamp(12px,3vw,40px)}
+.stage{position:relative;width:min(100%,780px);padding:12px;background:linear-gradient(135deg,#b49d6f,var(--frame) 40%,#6e5f42);box-shadow:0 14px 30px rgba(20,24,22,.25)}
+.stage canvas{display:block;width:100%;height:auto}
+.stage canvas + canvas{position:absolute;left:12px;top:12px;width:calc(100% - 24px)}
+.time-caption{text-align:center;min-height:3.2em}
+.time-caption .t{font-family:var(--f-kr);font-weight:700;font-size:18px;display:block}
+.time-caption .e{font-family:var(--f-display);font-style:italic;font-weight:600;color:var(--ink-soft);font-size:17px}
+.scrub{width:min(100%,780px);display:flex;flex-direction:column;gap:6px}
+.scrub-row{display:flex;gap:12px;align-items:center}
+.scrub input[type=range]{flex:1;min-width:0;accent-color:var(--poppy)}
+.ticks{position:relative;height:18px;margin:0 8px 0 56px}
+.ticks span{position:absolute;transform:translateX(-50%);font-family:var(--f-mono);font-size:10.5px;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums}
+.play{appearance:none;border:0;cursor:pointer;width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--wall);display:grid;place-items:center;flex:none}
+.play svg{width:16px;height:16px;fill:currentColor}
+
+.closing{margin:44px auto 0;max-width:46ch;text-align:center;display:flex;flex-direction:column;gap:12px}
+.closing blockquote{margin:0;font-family:var(--f-kr);font-size:clamp(19px,2.6vw,24px);line-height:1.6}
+.closing cite{font-family:var(--f-display);font-style:italic;font-weight:700;color:var(--ink-soft);font-size:20px}
+.final-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:28px}
+.note{font-size:13px;color:var(--ink-soft);text-align:center;margin-top:10px}
+.sample-tag{display:inline-block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;padding:2px 8px;border-radius:999px;background:var(--poppy);color:var(--poppy-ink);vertical-align:middle;margin-left:8px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--ink);color:var(--wall);padding:10px 18px;border-radius:999px;font-size:14px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media (prefers-reduced-motion: reduce){
+  .dawn-layer{animation:none;background-position:40% 50%}
+  .flicker{animation:none}
+  *{transition-duration:.01ms !important}
+}
+@media (max-width:520px){
+  .ceiling{grid-template-columns:repeat(4,1fr)}
+  .ceiling .panel:nth-child(n+9){display:none}
+  .ticks{margin-left:56px}
+}
+</style>
+
+<div class="wrap">
+
+  <!-- 0. Intro: the study hall -->
+  <section class="hall" id="hall" aria-label="시작">
+    <div class="ceiling" aria-hidden="true">
+      <i class="panel"></i><i class="panel"></i><i class="panel"></i><i class="panel"></i><i class="panel"></i><i class="panel"></i>
+      <i class="panel"></i><i class="panel"></i><i class="panel"></i><i class="panel"></i><i class="panel"></i><i class="panel"></i>
+    </div>
+    <div class="dawn-layer" aria-hidden="true"></div>
+    <div class="hall-body">
+      <div class="before">
+        <span class="eyebrow">면학실 · 07:00 – 24:00</span>
+        <h1><span class="nb">모두를 똑같이 비추는</span><br><span class="nb">하나의 빛</span></h1>
+        <p class="lede">이 조명은 아침부터 자정까지 꺼지지 않습니다.<br>언제 보아도 같은 밝기와 같은 색을 가진 이 공간의 바깥에는 무엇이 있을까요?</p>
+        <div class="switch-row">
+          <button class="switch" id="switch" aria-label="조명 끄기"></button>
+          <span class="switch-hint">스위치를 내려 조명을 꺼 보세요</span>
+        </div>
+      </div>
+      <div class="after">
+        <span class="wordmark">Carpe Lucem:<br>Seize your light</span>
+        <p>조명이 꺼지면 빛이 흐르기 시작해요. 같은 건초더미와 같은 성당을 빛이 바뀔 때마다 다시 그린 모네처럼, 이제 당신의 연작을 만들어보세요!</p>
+        <div class="row">
+          <button class="btn btn-dark" id="start">연작 만들기</button>
+        </div>
+      </div>
+    </div>
+    <div class="desks" aria-hidden="true">
+      <i class="desk"></i><i class="desk"></i><i class="desk"></i><i class="desk"></i><i class="desk"></i><i class="desk"></i>
+      <i class="desk"></i><i class="desk"></i><i class="desk"></i><i class="desk"></i><i class="desk"></i><i class="desk"></i>
+    </div>
+  </section>
+
+  <!-- App -->
+  <div id="app" hidden>
+    <header class="topbar">
+      <span class="mark">Seize your light</span>
+      <ol class="steps" aria-label="진행 단계">
+        <li id="st1" aria-current="step">1 목표</li>
+        <li id="st2">2 기록</li>
+        <li id="st3">3 서명</li>
+        <li id="st4">4 연작</li>
+      </ol>
+    </header>
+
+    <!-- 1. Goal -->
+    <section id="step1">
+      <div class="step-head">
+        <span class="kicker">목표</span>
+        <h2>당신이 계속 기록하고 싶은 것은 무엇인가요?</h2>
+        <p>매일 반복하고 싶은 행동, 자꾸 눈길이 가는 풍경, 뭐든 좋아요. 이것이 연작의 제목이 됩니다.</p>
+      </div>
+      <div class="goal-box">
+        <label class="sr" for="goal">목표</label>
+        <input class="goal-input" id="goal" maxlength="30" placeholder="예: 창밖의 바다" autocomplete="off">
+        <div class="chips" aria-label="예시">
+          <button class="chip" type="button">매일 아침 창밖</button>
+          <button class="chip" type="button">동네 산책길</button>
+          <button class="chip" type="button">책상 위의 그림 연습</button>
+          <button class="chip" type="button">저녁 러닝 코스</button>
+        </div>
+        <div class="row" style="justify-content:space-between">
+          <span class="counter" id="goalCount">0 / 30</span>
+          <button class="btn btn-poppy" id="toStep2" disabled>다음: 빛 기록하기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Upload -->
+    <section id="step2" hidden>
+      <div class="step-head">
+        <span class="kicker">기록</span>
+        <h2>같은 자리, 다른 시간의 빛을 올려 주세요.</h2>
+        <p>비슷한 구도로 서로 다른 시간에 찍은 사진을 2장에서 10장까지. 사진은 이 세션 안에서만 사용되고 어디에도 저장되지 않습니다.</p>
+      </div>
+      <label class="drop" id="drop">
+        <strong>사진 고르기</strong>
+        <span>또는 여기로 끌어다 놓기 · JPG, PNG</span>
+        <input type="file" id="file" class="file-input" accept="image/*" multiple aria-label="사진 고르기">
+      </label>
+      <ul class="tips">
+        <li>창가, 골목, 책상처럼 다시 찾기 쉬운 자리가 좋아요.</li>
+        <li>아침, 한낮, 해 질 녘처럼 시간대를 넓게 나눠 보세요.</li>
+        <li>촬영 시각은 사진 정보에서 읽어 옵니다. 틀리면 직접 고칠 수 있어요.</li>
+      </ul>
+      <p class="note" style="text-align:left">당장 사진이 없다면 <button class="linkish" id="useSample" type="button">예시 연작으로 체험하기</button></p>
+      <div class="shots" id="shots"></div>
+      <div class="bar-actions">
+        <button class="btn btn-ghost" id="back1" type="button">목표 수정하기</button>
+        <span class="status" id="shotStatus">사진 0장 · 2장부터 연작을 만들 수 있어요</span>
+        <button class="btn btn-poppy" id="paint" disabled>연작 그리기</button>
+      </div>
+    </section>
+
+    <!-- 2.5 Painting -->
+    <section id="painting" hidden>
+      <div class="easel">
+        <canvas id="easelCanvas" width="560" height="380" aria-label="그리는 중인 그림"></canvas>
+        <p id="easelText">붓을 준비하는 중</p>
+      </div>
+    </section>
+
+    <!-- 2.7 Signature -->
+    <section id="sign" hidden>
+      <div class="step-head">
+        <span class="kicker">서명</span>
+        <h2>연작을 완성하려면, 서명을 입력해 주세요.</h2>
+        <p>서명은 모든 그림의 오른쪽 아래에 들어갑니다.</p>
+      </div>
+      <div class="sign-grid">
+        <div class="sign-preview"><canvas id="signPreview" role="img" aria-label="서명 미리보기"></canvas></div>
+        <div class="sign-form">
+          <label class="sign-label" for="sigName">서명</label>
+          <input class="goal-input sig-input" id="sigName" maxlength="16" placeholder="이름 또는 이니셜" autocomplete="off">
+          <fieldset class="sig-colors">
+            <legend class="sign-label">서명 색</legend>
+            <label class="sig-opt"><input type="radio" name="sigColor" value="black" checked><span class="sw sw-black"></span>Black</label>
+            <label class="sig-opt"><input type="radio" name="sigColor" value="white"><span class="sw sw-white"></span>White</label>
+          </fieldset>
+        </div>
+      </div>
+      <div class="bar-actions">
+        <button class="btn btn-ghost" id="back2" type="button">사진 수정하기</button>
+        <button class="btn btn-poppy" id="finish" disabled>연작 완성하기</button>
+      </div>
+    </section>
+
+    <!-- 3. Series -->
+    <section id="step3" hidden>
+      <div class="series-head">
+        <div>
+          <h2 id="seriesTitle">연작</h2>
+          <p class="meta" id="seriesMeta"></p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="보기 방식">
+          <button class="tab" role="tab" id="tabWall" aria-selected="true" aria-controls="wall">전시 벽</button>
+          <button class="tab" role="tab" id="tabTime" aria-selected="false" aria-controls="timeview">시간 따라 보기</button>
+        </div>
+      </div>
+
+      <div class="wall" id="wall" role="tabpanel" aria-labelledby="tabWall"></div>
+
+      <div class="timeview" id="timeview" role="tabpanel" aria-labelledby="tabTime" hidden>
+        <div class="stage">
+          <canvas id="stageA"></canvas>
+          <canvas id="stageB"></canvas>
+        </div>
+        <div class="time-caption" id="timeCaption" aria-live="polite"></div>
+        <div class="scrub">
+          <div class="scrub-row">
+            <button class="play" id="play" aria-label="재생"><svg viewBox="0 0 16 16"><path id="playIcon" d="M3 1.5v13l11-6.5z"/></svg></button>
+            <label class="sr" for="scrub">시간</label>
+            <input type="range" id="scrub" min="0" max="100" value="0" step="any">
+          </div>
+          <div class="ticks" id="ticks"></div>
+        </div>
+      </div>
+
+      <div class="closing">
+        <blockquote>당신만의 빛을 기록했어요.<br>내일 또 기록해 볼까요?</blockquote>
+        <cite>Seize your light</cite>
+      </div>
+      <div class="final-actions">
+        <button class="btn btn-poppy" id="save" hidden>연작 이미지로 저장</button>
+        <button class="btn btn-ghost" id="addMore" type="button">사진 더 추가하기</button>
+        <button class="btn btn-ghost" id="restart" type="button">새 연작 시작하기</button>
+      </div>
+      <p class="note" id="saveNote"></p>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const MAX = 10, MIN = 2;
+  const state = { goal: "", items: [], sample: false, painted: [], sig: "", sigColor: "black" };
+  let uid = 0;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- toast ---------- */
+  let toastT;
+  function toast(msg){
+    let t = document.querySelector(".toast");
+    if(!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200);
+  }
+
+  /* ---------- intro ---------- */
+  const hall = $("#hall");
+  $("#switch").addEventListener("click", () => {
+    if(!reduced) hall.classList.add("flicker");
+    setTimeout(() => { hall.classList.remove("flicker"); hall.classList.add("off"); }, reduced ? 0 : 700);
+    setTimeout(() => { hall.classList.add("dawn"); $("#start").focus({preventScroll:true}); }, reduced ? 50 : 1500);
+  });
+  $("#start").addEventListener("click", () => {
+    hall.hidden = true; $("#app").hidden = false; show("step1"); $("#goal").focus();
+    window.scrollTo(0,0);
+  });
+
+  /* ---------- steps ---------- */
+  function show(id){
+    for (const s of ["step1","step2","painting","sign","step3"]) $("#"+s).hidden = s !== id;
+    const map = { step1:1, step2:2, painting:2, sign:3, step3:4 };
+    [1,2,3,4].forEach(n => { const li = $("#st"+n); if(map[id]===n) li.setAttribute("aria-current","step"); else li.removeAttribute("aria-current"); });
+    window.scrollTo({top:0, behavior: reduced ? "auto" : "smooth"});
+  }
+
+  /* ---------- goal ---------- */
+  const goal = $("#goal");
+  function syncGoal(){
+    state.goal = goal.value.trim();
+    $("#goalCount").textContent = goal.value.length + " / 30";
+    $("#toStep2").disabled = state.goal.length === 0;
+  }
+  goal.addEventListener("input", syncGoal);
+  goal.addEventListener("keydown", e => { if(e.key === "Enter" && state.goal) $("#toStep2").click(); });
+  document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { goal.value = c.textContent; syncGoal(); goal.focus(); }));
+  $("#toStep2").addEventListener("click", () => { if(!state.goal) return; show("step2"); });
+  $("#back1").addEventListener("click", () => show("step1"));
+
+  /* ---------- EXIF date ---------- */
+  function readExifDate(buf){
+    try{
+      const v = new DataView(buf);
+      if(v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
+      let off = 2;
+      while(off + 4 < v.byteLength){
+        const marker = v.getUint16(off); off += 2;
+        if((marker & 0xFF00) !== 0xFF00) return null;
+        const len = v.getUint16(off);
+        if(marker === 0xFFE1 && v.getUint32(off+2) === 0x45786966 && v.getUint16(off+6) === 0){
+          return parseTiff(v, off + 8);
+        }
+        if(marker === 0xFFDA) return null;
+        off += len;
+      }
+    }catch(e){}
+    return null;
+  }
+  function parseTiff(v, t){
+    const little = v.getUint16(t) === 0x4949;
+    const g16 = o => v.getUint16(o, little), g32 = o => v.getUint32(o, little);
+    const str = (o, n) => { let s=""; for(let i=0;i<n;i++){ const c=v.getUint8(o+i); if(!c) break; s+=String.fromCharCode(c);} return s; };
+    const scan = (ifd, wanted) => {
+      const out = {}; const n = g16(ifd);
+      for(let i=0;i<n;i++){
+        const e = ifd + 2 + i*12, tag = g16(e);
+        if(wanted.includes(tag)){
+          if(tag === 0x8769) out[tag] = g32(e+8);
+          else out[tag] = str(t + g32(e+8), 19);
+        }
+      }
+      return out;
+    };
+    const ifd0 = scan(t + g32(t+4), [0x8769, 0x0132]);
+    let s = null;
+    if(ifd0[0x8769]){ const ex = scan(t + ifd0[0x8769], [0x9003]); s = ex[0x9003] || null; }
+    s = s || ifd0[0x0132] || null;
+    if(!s) return null;
+    const m = s.match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/);
+    if(!m) return null;
+    const d = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+    return isNaN(d) ? null : d;
+  }
+
+  /* ---------- time helpers ---------- */
+  const pad = n => String(n).padStart(2,"0");
+  const toLocalInput = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  function koTime(d){
+    const h = d.getHours(), m = d.getMinutes();
+    const ap = h < 12 ? "오전" : "오후"; const hh = h % 12 === 0 ? 12 : h % 12;
+    return `${ap} ${hh}시 ${pad(m)}분`;
+  }
+  function effect(d){
+    const h = d.getHours() + d.getMinutes()/60;
+    if(h >= 4.5 && h < 7) return { fr:"Effet d’aube", ko:"새벽빛" };
+    if(h >= 7 && h < 10.5) return { fr:"Effet du matin", ko:"아침볕" };
+    if(h >= 10.5 && h < 14.5) return { fr:"Plein soleil", ko:"한낮의 햇빛" };
+    if(h >= 14.5 && h < 17) return { fr:"Fin d’après-midi", ko:"늦은 오후" };
+    if(h >= 17 && h < 19.5) return { fr:"Soleil couchant", ko:"해 질 녘" };
+    return { fr:"Effet de nuit", ko:"밤의 빛" };
+  }
+  const sorted = () => [...state.items].sort((a,b) => a.date - b.date);
+
+  /* ---------- upload ---------- */
+  const fileInput = $("#file"), drop = $("#drop");
+  fileInput.addEventListener("change", () => { addFiles(fileInput.files); fileInput.value = ""; });
+  ["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+
+  function readDataURL(f){
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
+  }
+  function loadImage(src){
+    return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+  }
+  async function addFiles(list){
+    if(state.sample){ state.items = []; state.sample = false; }
+    const files = [...list].filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp)$/i.test(f.name));
+    let skipped = 0, failed = 0;
+    for(const f of files){
+      if(state.items.length >= MAX){ skipped++; continue; }
+      try{
+        const buf = await f.arrayBuffer();
+        const exif = readExifDate(buf);
+        const url = await readDataURL(f);
+        const img = await loadImage(url);
+        state.items.push({ id: ++uid, img, url, date: exif || new Date(f.lastModified || Date.now()), fromExif: !!exif });
+      }catch(e){ failed++; }
+    }
+    renderShots();
+    if(failed) toast(`${failed}장은 열 수 없었어요. 아이폰 사진(HEIC)은 JPG로 바꿔 올려 주세요.`);
+    else if(skipped) toast(`사진은 최대 ${MAX}장까지예요. ${skipped}장은 넣지 않았어요.`);
+  }
+
+  function renderShots(){
+    const box = $("#shots"); box.innerHTML = "";
+    sorted().forEach((it, i) => {
+      const el = document.createElement("div"); el.className = "shot";
+      const img = document.createElement("img"); img.src = it.url; img.alt = `${i+1}번째 기록`;
+      const lab = document.createElement("label"); lab.htmlFor = "t" + it.id; lab.textContent = it.fromExif ? "촬영 시각" : "촬영 시각 (확인해 주세요)";
+      const inp = document.createElement("input"); inp.type = "datetime-local"; inp.id = "t" + it.id; inp.value = toLocalInput(it.date);
+      inp.addEventListener("change", () => { const d = new Date(inp.value); if(!isNaN(d)){ it.date = d; it.fromExif = true; renderShots(); } });
+      const foot = document.createElement("div"); foot.className = "shot-foot";
+      const no = document.createElement("span"); no.className = "no"; no.textContent = `No. ${i+1} · ${effect(it.date).ko}`;
+      const rm = document.createElement("button"); rm.className = "rm"; rm.type = "button"; rm.textContent = "빼기";
+      rm.addEventListener("click", () => { state.items = state.items.filter(x => x !== it); renderShots(); });
+      foot.append(no, rm);
+      el.append(img, lab, inp, foot); box.appendChild(el);
+    });
+    const n = state.items.length, st = $("#shotStatus");
+    if(n < MIN){ st.textContent = `사진 ${n}장 · ${MIN}장부터 연작을 만들 수 있어요`; st.classList.toggle("warn", n > 0); }
+    else { st.textContent = `사진 ${n}장${n >= MAX ? " · 최대 개수예요" : ""}`; st.classList.remove("warn"); }
+    $("#paint").disabled = n < MIN;
+    drop.hidden = n >= MAX;
+  }
+
+  /* ---------- sample series (synthetic Giverny haystack field) ---------- */
+  function sampleScene(kind){
+    const W = 960, H = 640, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d");
+    const P = {
+      dawn:  { sky:["#6E6A9E","#D9A3B4","#F5D1B0"], sun:"#FCE7C2", sunY:.48, hill:"#7D7B9C", field:["#9A9572","#C9B48C"], stack:"#B38A6A", shade:"#6B5F7A", water:"#B9AECB", glow:.35 },
+      noon:  { sky:["#5D8FC6","#9EC4E2","#DCEBF2"], sun:"#FFFBEA", sunY:.12, hill:"#6F8F86", field:["#8FA35C","#D6C47A"], stack:"#D9AE5E", shade:"#5E6F55", water:"#86B3CF", glow:.15 },
+      dusk:  { sky:["#3D3A72","#D7684A","#F4B160"], sun:"#FFD77A", sunY:.5, hill:"#5B4A63", field:["#8A5A3C","#D08B4E"], stack:"#C9673A", shade:"#4A3550", water:"#E19A6B", glow:.55 },
+      night: { sky:["#0E1530","#22325E","#3E4C7A"], sun:"#E8ECF5", sunY:.16, hill:"#1C2440", field:["#232C45","#3A4462"], stack:"#4F5677", shade:"#151B30", water:"#2F3E66", glow:.1 }
+    }[kind];
+    let g = x.createLinearGradient(0,0,0,H*.55); g.addColorStop(0,P.sky[0]); g.addColorStop(.6,P.sky[1]); g.addColorStop(1,P.sky[2]);
+    x.fillStyle = g; x.fillRect(0,0,W,H*.56);
+    const sx = kind === "dawn" ? W*.22 : kind === "dusk" ? W*.78 : W*.7, sy = H*P.sunY;
+    const rg = x.createRadialGradient(sx,sy,4,sx,sy,W*.35); rg.addColorStop(0,P.sun); rg.addColorStop(.12,P.sun); rg.addColorStop(1,"rgba(255,255,255,0)");
+    x.globalAlpha = .55 + P.glow*.6; x.fillStyle = rg; x.fillRect(0,0,W,H); x.globalAlpha = 1;
+    x.fillStyle = P.sun; x.beginPath(); x.arc(sx,sy,kind==="night"?20:26,0,Math.PI*2); x.fill();
+    if(kind === "night"){ x.fillStyle = "#fff"; for(let i=0;i<60;i++){ x.globalAlpha = Math.random()*.8; x.fillRect(Math.random()*W, Math.random()*H*.45, 1.6, 1.6);} x.globalAlpha = 1; }
+    x.fillStyle = P.hill; x.beginPath(); x.moveTo(0,H*.56);
+    for(let i=0;i<=12;i++) x.lineTo(i*W/12, H*(.47 + .05*Math.sin(i*1.3) + .02*Math.cos(i*3.1)));
+    x.lineTo(W,H*.56); x.closePath(); x.fill();
+    // poplar row
+    x.fillStyle = P.shade;
+    for(let i=0;i<9;i++){ const px = W*(.05 + i*.11), ph = H*(.14 + .03*Math.sin(i)); x.beginPath(); x.ellipse(px, H*.53 - ph/2, 11, ph/2, 0, 0, Math.PI*2); x.fill(); }
+    g = x.createLinearGradient(0,H*.55,0,H); g.addColorStop(0,P.field[0]); g.addColorStop(1,P.field[1]);
+    x.fillStyle = g; x.fillRect(0,H*.55,W,H*.45);
+    // water strip
+    x.fillStyle = P.water; x.fillRect(0,H*.86,W,H*.14);
+    x.globalAlpha = .5; x.fillStyle = P.sun; for(let i=0;i<14;i++){ x.fillRect(sx - 40 + Math.random()*80, H*(.875 + i*.009), 30 + Math.random()*60, 3); } x.globalAlpha = 1;
+    // haystacks
+    const stack = (cx, base, w, h) => {
+      const shOff = kind==="dawn" ? 1 : kind==="dusk" ? -1 : .3;
+      x.fillStyle = P.shade; x.globalAlpha = .55; x.beginPath(); x.ellipse(cx + shOff*w*.9, base+4, w*1.1, h*.08, 0, 0, Math.PI*2); x.fill(); x.globalAlpha = 1;
+      x.fillStyle = P.stack; x.beginPath(); x.moveTo(cx-w/2, base); x.lineTo(cx-w/2, base-h*.45);
+      x.quadraticCurveTo(cx-w*.55, base-h*.8, cx, base-h); x.quadraticCurveTo(cx+w*.55, base-h*.8, cx+w/2, base-h*.45); x.lineTo(cx+w/2, base); x.closePath(); x.fill();
+      x.fillStyle = P.shade; x.globalAlpha = .45; x.beginPath();
+      if(shOff >= 0){ x.moveTo(cx, base-h); x.quadraticCurveTo(cx+w*.55, base-h*.8, cx+w/2, base-h*.45); x.lineTo(cx+w/2, base); x.lineTo(cx+w*.05, base); }
+      else { x.moveTo(cx, base-h); x.quadraticCurveTo(cx-w*.55, base-h*.8, cx-w/2, base-h*.45); x.lineTo(cx-w/2, base); x.lineTo(cx-w*.05, base); }
+      x.closePath(); x.fill(); x.globalAlpha = 1;
+    };
+    stack(W*.38, H*.8, 170, 190); stack(W*.66, H*.74, 110, 120);
+    return c;
+  }
+  $("#useSample").addEventListener("click", async () => {
+    const today = new Date(); const mk = (h,m) => new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m);
+    const defs = [["dawn",6,42],["noon",12,15],["dusk",17,48],["night",20,30]];
+    state.items = []; state.sample = true;
+    for(const [k,h,m] of defs){
+      const c = sampleScene(k); const url = c.toDataURL("image/jpeg", .9); const img = await loadImage(url);
+      state.items.push({ id: ++uid, img, url, date: mk(h,m), fromExif: true });
+    }
+    if(!state.goal){ goal.value = "들판의 건초더미"; syncGoal(); }
+    renderShots(); toast("예시 사진 4장을 넣었어요. 자기 사진을 올리면 예시는 사라져요.");
+  });
+
+  /* ---------- the impressionist brush ---------- */
+  function rng(seed){ let s = seed >>> 0; return () => { s += 0x6D2B79F5; let t = s; t = Math.imul(t ^ t>>>15, t|1); t ^= t + Math.imul(t ^ t>>>7, t|61); return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
+  function rgb2hsl(r,g,b){ r/=255; g/=255; b/=255; const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let h=0, s=0; const l=(mx+mn)/2;
+    if(mx!==mn){ const d=mx-mn; s = l>.5 ? d/(2-mx-mn) : d/(mx+mn);
+      h = mx===r ? (g-b)/d + (g<b?6:0) : mx===g ? (b-r)/d + 2 : (r-g)/d + 4; h/=6; }
+    return [h,s,l]; }
+  function hsl2rgb(h,s,l){ if(s===0){ const v=Math.round(l*255); return [v,v,v]; }
+    const q = l<.5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+    const f = t => { t<0&&(t+=1); t>1&&(t-=1); return t<1/6 ? p+(q-p)*6*t : t<1/2 ? q : t<2/3 ? p+(q-p)*(2/3-t)*6 : p; };
+    return [Math.round(f(h+1/3)*255), Math.round(f(h)*255), Math.round(f(h-1/3)*255)]; }
+  const tick = () => new Promise(r => requestAnimationFrame(() => r()));
+
+  async function impression(img, seed, onFrame){
+    const maxDim = 960;
+    const sc = Math.min(1, maxDim / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+    const W = Math.max(2, Math.round((img.naturalWidth || img.width) * sc)), H = Math.max(2, Math.round((img.naturalHeight || img.height) * sc));
+    const R = rng(seed);
+    // source (lightly softened by a half-size round trip)
+    const half = document.createElement("canvas"); half.width = Math.ceil(W/2); half.height = Math.ceil(H/2);
+    const hx = half.getContext("2d"); hx.imageSmoothingQuality = "high"; hx.drawImage(img, 0, 0, half.width, half.height);
+    const src = document.createElement("canvas"); src.width = W; src.height = H;
+    const sx = src.getContext("2d", { willReadFrequently: true }); sx.imageSmoothingQuality = "high"; sx.drawImage(half, 0, 0, W, H);
+    const S = sx.getImageData(0,0,W,H).data;
+    // gradient field on a quarter-size luminance map
+    const q = 4, gw = Math.ceil(W/q), gh = Math.ceil(H/q);
+    const gc = document.createElement("canvas"); gc.width = gw; gc.height = gh;
+    const gx_ = gc.getContext("2d", { willReadFrequently: true }); gx_.drawImage(img, 0, 0, gw, gh);
+    const G = gx_.getImageData(0,0,gw,gh).data; const L = new Float32Array(gw*gh);
+    for(let i=0;i<gw*gh;i++) L[i] = .299*G[i*4] + .587*G[i*4+1] + .114*G[i*4+2];
+    const lum = (x,y) => L[Math.min(gh-1,Math.max(0,y))*gw + Math.min(gw-1,Math.max(0,x))];
+    function grad(px,py){
+      const x = Math.floor(px/q), y = Math.floor(py/q);
+      const gx = (lum(x+1,y-1)+2*lum(x+1,y)+lum(x+1,y+1)) - (lum(x-1,y-1)+2*lum(x-1,y)+lum(x-1,y+1));
+      const gy = (lum(x-1,y+1)+2*lum(x,y+1)+lum(x+1,y+1)) - (lum(x-1,y-1)+2*lum(x,y-1)+lum(x+1,y-1));
+      return [gx, gy];
+    }
+    const out = document.createElement("canvas"); out.width = W; out.height = H;
+    const o = out.getContext("2d");
+    // underpainting: a very soft, slightly warm wash
+    const tiny = document.createElement("canvas"); tiny.width = Math.max(2, Math.round(W/24)); tiny.height = Math.max(2, Math.round(H/24));
+    const tx = tiny.getContext("2d"); tx.drawImage(img, 0, 0, tiny.width, tiny.height);
+    o.imageSmoothingQuality = "high"; o.drawImage(tiny, 0, 0, W, H);
+    o.globalAlpha = .08; o.fillStyle = "#e9d7b8"; o.fillRect(0,0,W,H); o.globalAlpha = 1;
+    o.lineCap = "round";
+    const base = Math.max(W,H);
+    const layers = [ { r: base/40, keep: 1, alpha: .82 }, { r: base/72, keep: 1, alpha: .85 }, { r: base/130, keep: .35, alpha: .9, detail: true } ];
+    for(const Ly of layers){
+      const step = Ly.r * .85, pts = [];
+      for(let y = step/2; y < H; y += step) for(let x = step/2; x < W; x += step) pts.push([x + (R()-.5)*step, y + (R()-.5)*step]);
+      for(let i = pts.length - 1; i > 0; i--){ const j = Math.floor(R()*(i+1)); [pts[i], pts[j]] = [pts[j], pts[i]]; }
+      for(const [px,py] of pts){
+        const xi = Math.min(W-1, Math.max(0, px|0)), yi = Math.min(H-1, Math.max(0, py|0));
+        const [gx, gy] = grad(xi, yi); const mag = Math.hypot(gx, gy);
+        if(Ly.detail && mag < 60 && R() > Ly.keep) continue;
+        const k = (yi*W + xi)*4;
+        let [h,s,l] = rgb2hsl(S[k], S[k+1], S[k+2]);
+        h = (h + (R()-.5)*.035 + 1) % 1; s = Math.min(1, s*1.22 + .04); l = Math.min(.97, Math.max(.03, l + (R()-.5)*.09));
+        const [r,g,b] = hsl2rgb(h,s,l);
+        const ang = mag > 8 ? Math.atan2(gy, gx) + Math.PI/2 + (R()-.5)*.5 : (R()-.5)*.7;
+        const len = Ly.r * (1.3 + R()*1.6), dx = Math.cos(ang)*len/2, dy = Math.sin(ang)*len/2;
+        o.globalAlpha = Ly.alpha; o.strokeStyle = `rgb(${r},${g},${b})`;
+        o.lineWidth = Ly.r * (.55 + R()*.45);
+        o.beginPath(); o.moveTo(px-dx, py-dy); o.lineTo(px+dx, py+dy); o.stroke();
+      }
+      o.globalAlpha = 1;
+      if(onFrame) onFrame(out);
+      await tick();
+    }
+    // canvas weave
+    const tex = document.createElement("canvas"); tex.width = tex.height = 96;
+    const tc = tex.getContext("2d"); const id = tc.createImageData(96,96);
+    for(let i=0;i<96*96;i++){ const v = 128 + (R()-.5)*90 + ((i%96)%3===0 ? 14 : 0) + (Math.floor(i/96)%3===0 ? 10 : 0); id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=v; id.data[i*4+3]=255; }
+    tc.putImageData(id,0,0);
+    o.globalCompositeOperation = "soft-light"; o.globalAlpha = .28; o.fillStyle = o.createPattern(tex, "repeat"); o.fillRect(0,0,W,H);
+    o.globalCompositeOperation = "source-over"; o.globalAlpha = 1;
+    if(onFrame) onFrame(out);
+    return out;
+  }
+
+  /* ---------- paint the series ---------- */
+  $("#paint").addEventListener("click", async () => {
+    if(state.items.length < MIN) return;
+    show("painting");
+    const list = sorted(); const easel = $("#easelCanvas"), ex = easel.getContext("2d"), txt = $("#easelText");
+    const draw = c => { easel.width = c.width; easel.height = c.height; ex.drawImage(c, 0, 0); };
+    state.painted = [];
+    for(let i=0;i<list.length;i++){
+      txt.textContent = `${i+1} / ${list.length} · ${koTime(list[i].date)}의 빛을 그리는 중`;
+      const c = await impression(list[i].img, 1000 + list[i].id*97, draw);
+      state.painted.push({ base: c, canvas: c, date: list[i].date });
+    }
+    openSign();
+  });
+
+  /* ---------- signature ---------- */
+  const SIG_FONT = '"Nanum Pen Script", "Cormorant Garamond", cursive';
+  const sigInput = $("#sigName");
+  async function fontReady(){ try{ await document.fonts.load(`48px ${SIG_FONT}`, "가A"); }catch(e){} }
+  function signed(base, text, color){
+    const c = cloneCanvas(base); if(!text) return c;
+    const x = c.getContext("2d"), W = c.width, H = c.height;
+    const size = Math.round(Math.max(W, H) * 0.058), m = Math.round(Math.min(W, H) * 0.05);
+    x.save(); x.translate(W - m, H - m); x.rotate(-0.06);
+    x.font = `${size}px ${SIG_FONT}`; x.textAlign = "right"; x.textBaseline = "alphabetic";
+    x.shadowColor = color === "white" ? "rgba(0,0,0,.5)" : "rgba(255,255,255,.35)"; x.shadowBlur = size * 0.08;
+    x.fillStyle = color === "white" ? "#F8F5EE" : "#15120F";
+    x.fillText(text, 0, 0); x.restore();
+    return c;
+  }
+  function drawSignPreview(){
+    const P = state.painted; if(!P.length) return;
+    const pv = $("#signPreview"), c = signed(P[0].base, state.sig, state.sigColor);
+    pv.width = c.width; pv.height = c.height; pv.getContext("2d").drawImage(c, 0, 0);
+    $("#finish").disabled = !state.sig;
+  }
+  async function openSign(){
+    show("sign"); state.sig = sigInput.value.trim(); await fontReady(); drawSignPreview();
+  }
+  sigInput.addEventListener("input", () => { state.sig = sigInput.value.trim(); drawSignPreview(); });
+  sigInput.addEventListener("keydown", e => { if(e.key === "Enter" && state.sig) $("#finish").click(); });
+  document.querySelectorAll('input[name="sigColor"]').forEach(r => r.addEventListener("change", () => { if(r.checked){ state.sigColor = r.value; drawSignPreview(); } }));
+  $("#finish").addEventListener("click", () => {
+    if(!state.sig) return;
+    state.painted.forEach(p => { p.canvas = signed(p.base, state.sig, state.sigColor); });
+    renderSeries(); show("step3");
+  });
+  $("#back2").addEventListener("click", () => show("step2"));
+
+  function titleFor(d){ return `${state.goal}, ${koTime(d)}`; }
+  function cloneCanvas(c){ const n = document.createElement("canvas"); n.width = c.width; n.height = c.height; n.getContext("2d").drawImage(c,0,0); return n; }
+
+  function renderSeries(){
+    const P = state.painted, N = P.length;
+    const t = $("#seriesTitle"); t.textContent = `「${state.goal}」 연작`;
+    if(state.sample){ const tag = document.createElement("span"); tag.className = "sample-tag"; tag.textContent = "예시"; t.appendChild(tag); }
+    const first = P[0].date, last = P[N-1].date;
+    const sameDay = first.toDateString() === last.toDateString();
+    $("#seriesMeta").textContent = `${N}점 · ${sameDay ? `${first.getMonth()+1}월 ${first.getDate()}일` : `${first.getMonth()+1}월 ${first.getDate()}일 – ${last.getMonth()+1}월 ${last.getDate()}일`} · ${koTime(first)} – ${koTime(last)}`;
+    // wall
+    const wall = $("#wall"); wall.innerHTML = "";
+    P.forEach((p, i) => {
+      const fx = effect(p.date);
+      const w = document.createElement("figure"); w.className = "work"; w.style.margin = "0";
+      const fr = document.createElement("div"); fr.className = "frame"; const cv = cloneCanvas(p.canvas);
+      cv.setAttribute("role","img"); cv.setAttribute("aria-label", titleFor(p.date));
+      fr.appendChild(cv);
+      const lb = document.createElement("figcaption"); lb.className = "label";
+      lb.innerHTML = `<span class="t"></span><span class="e"></span><span class="n"></span>`;
+      lb.querySelector(".t").textContent = titleFor(p.date);
+      lb.querySelector(".e").textContent = `${fx.fr} · ${fx.ko}`;
+      lb.querySelector(".n").textContent = `No. ${i+1} / ${N}`;
+      w.append(fr, lb); wall.appendChild(w);
+    });
+    // time view
+    const a = $("#stageA"), b = $("#stageB");
+    const w0 = P[0].canvas.width, h0 = P[0].canvas.height;
+    [a,b].forEach(c => { c.width = w0; c.height = h0; });
+    const scrub = $("#scrub"); scrub.max = String((N-1)*100); scrub.value = "0";
+    const ticks = $("#ticks"); ticks.innerHTML = "";
+    P.forEach((p,i) => { const s = document.createElement("span"); s.style.left = (N===1?0:i/(N-1)*100) + "%"; s.textContent = `${pad(p.date.getHours())}:${pad(p.date.getMinutes())}`; ticks.appendChild(s); });
+    drawTime(0);
+    // save
+    setupSave();
+  }
+
+  function fit(ctx, src, W, H){
+    ctx.fillStyle = "#11100e"; ctx.fillRect(0,0,W,H);
+    const s = Math.max(W/src.width, H/src.height), w = src.width*s, h = src.height*s;
+    ctx.drawImage(src, (W-w)/2, (H-h)/2, w, h);
+  }
+  function drawTime(v){
+    const P = state.painted, N = P.length; if(!N) return;
+    const a = $("#stageA"), b = $("#stageB"), ax = a.getContext("2d"), bx = b.getContext("2d");
+    const i = Math.min(N-1, Math.floor(v/100)), f = (v/100) - i;
+    fit(ax, P[i].canvas, a.width, a.height);
+    if(i < N-1){ fit(bx, P[i+1].canvas, b.width, b.height); b.style.opacity = f.toFixed(3); }
+    else { bx.clearRect(0,0,b.width,b.height); b.style.opacity = "0"; }
+    const near = P[Math.min(N-1, Math.round(v/100))]; const fx = effect(near.date);
+    const cap = $("#timeCaption"); cap.innerHTML = `<span class="t"></span><span class="e"></span>`;
+    cap.querySelector(".t").textContent = titleFor(near.date);
+    cap.querySelector(".e").textContent = `${fx.fr} · ${fx.ko}`;
+  }
+  $("#scrub").addEventListener("input", e => { stopPlay(); drawTime(+e.target.value); });
+
+  let playing = null;
+  function stopPlay(){ if(playing){ cancelAnimationFrame(playing); clearTimeout(playing); playing = null; $("#playIcon").setAttribute("d","M3 1.5v13l11-6.5z"); $("#play").setAttribute("aria-label","재생"); } }
+  $("#play").addEventListener("click", () => {
+    if(playing){ stopPlay(); return; }
+    const sc = $("#scrub"); const max = +sc.max; if(+sc.value >= max) sc.value = "0";
+    $("#playIcon").setAttribute("d","M3 1.5h3.5v13H3zM9.5 1.5H13v13H9.5z"); $("#play").setAttribute("aria-label","멈춤");
+    let last = null, pos = +sc.value;
+    const step = now => {
+      const dt = last === null ? 0 : Math.max(0, Math.min(100, now - last)); last = now;
+      let v = reduced ? Math.ceil((pos + 1)/100)*100 : pos + dt * 0.04;
+      pos = v;
+      if(v >= max){ v = max; sc.value = String(v); drawTime(v); stopPlay(); return; }
+      sc.value = String(v); drawTime(v);
+      if(reduced) last = null;
+      playing = reduced ? setTimeout(() => { playing = requestAnimationFrame(step); }, 1400) : requestAnimationFrame(step);
+    };
+    playing = requestAnimationFrame(step);
+  });
+
+  // tabs
+  function selectTab(which){
+    const wall = which === "wall";
+    $("#tabWall").setAttribute("aria-selected", String(wall)); $("#tabTime").setAttribute("aria-selected", String(!wall));
+    $("#wall").hidden = !wall; $("#timeview").hidden = wall;
+    if(wall) stopPlay(); else drawTime(+$("#scrub").value);
+  }
+  $("#tabWall").addEventListener("click", () => selectTab("wall"));
+  $("#tabTime").addEventListener("click", () => selectTab("time"));
+
+  /* ---------- save the whole series as one sheet ---------- */
+  let downloads = null;
+  async function setupSave(){
+    const btn = $("#save"), note = $("#saveNote");
+    try{ downloads = window.claude && window.claude.use ? await window.claude.use("downloads") : null; }catch(e){ downloads = null; }
+    if(downloads){ btn.hidden = false; note.textContent = ""; }
+    else { btn.hidden = false; note.textContent = ""; }
+  }
+  async function buildSheet(){
+    try{ await document.fonts.ready; }catch(e){}
+    const P = state.painted, N = P.length;
+    const cols = N <= 3 ? N : N === 4 ? 2 : N <= 6 ? 3 : N <= 8 ? 4 : 5;
+    const rows = Math.ceil(N/cols);
+    const W = 1800, pad = 90, gap = 44, cellW = (W - pad*2 - gap*(cols-1)) / cols;
+    const ratio = P[0].canvas.height / P[0].canvas.width, imgH = cellW * ratio, capH = 92;
+    const headH = 230, footH = 170;
+    const H = Math.round(headH + rows*(imgH + capH) + (rows-1)*gap + footH);
+    const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+    x.fillStyle = "#E6E8E1"; x.fillRect(0,0,W,H);
+    x.fillStyle = "#20282B"; x.textBaseline = "alphabetic";
+    x.font = "italic 700 42px 'Cormorant Garamond', serif"; x.fillText("Seize your light", pad, 104);
+    x.font = "700 64px 'Gowun Batang', serif"; x.fillText(`「${state.goal}」 연작`, pad, 186);
+    x.fillStyle = "#56605F"; x.font = "500 24px 'IBM Plex Mono', monospace";
+    x.textAlign = "right"; x.fillText(`${N}점 · ${koTime(P[0].date)} – ${koTime(P[N-1].date)}`, W - pad, 186); x.textAlign = "left";
+    P.forEach((p, i) => {
+      const cx = pad + (i % cols)*(cellW + gap), cy = headH + Math.floor(i/cols)*(imgH + capH + gap);
+      x.fillStyle = "#8A7A5C"; x.fillRect(cx-10, cy-10, cellW+20, imgH+20);
+      x.drawImage(p.canvas, cx, cy, cellW, imgH);
+      const fx = effect(p.date);
+      x.fillStyle = "#20282B"; x.font = `700 ${cols >= 4 ? 22 : 26}px 'Gowun Batang', serif`;
+      x.fillText(koTime(p.date), cx, cy + imgH + 48);
+      x.fillStyle = "#56605F"; x.font = `italic 600 ${cols >= 4 ? 22 : 26}px 'Cormorant Garamond', serif`;
+      x.fillText(`No. ${i+1} · ${fx.fr}`, cx, cy + imgH + 80);
+    });
+    x.fillStyle = "#20282B"; x.font = "400 30px 'Gowun Batang', serif"; x.textAlign = "center";
+    x.fillText("당신만의 빛을 기록했어요. 내일 또 기록해 볼까요?", W/2, H - 80);
+    return new Promise(res => c.toBlob(res, "image/png"));
+  }
+  $("#save").addEventListener("click", async () => {
+    const btn = $("#save"); btn.disabled = true; btn.textContent = "이미지 만드는 중";
+    try{
+      const blob = await buildSheet();
+      const safe = state.goal.replace(/[\\/:*?"<>|]/g, "").slice(0, 30) || "series";
+      if(!downloads){ const u = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = u; a.download = `seize-your-light_${safe}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); toast("연작 이미지를 저장했어요."); return; }
+      const r = await downloads.save({ filename: `seize-your-light_${safe}.png`, data: blob });
+      if(r && r.status === "saved") toast("연작 이미지를 저장했어요.");
+    }catch(e){
+      const code = e && e.code;
+      if(code === "declined") toast("저장을 취소했어요.");
+      else if(code === "rate_limited") toast("잠시 후 다시 눌러 주세요.");
+      else { toast("이 화면에서는 저장할 수 없어요. 화면 캡처로 공유해 주세요."); btn.hidden = true; }
+    }finally{ btn.disabled = false; btn.textContent = "연작 이미지로 저장"; }
+  });
+
+  $("#addMore").addEventListener("click", () => { stopPlay(); show("step2"); });
+  $("#restart").addEventListener("click", () => {
+    stopPlay(); state.items = []; state.painted = []; state.sample = false; goal.value = ""; syncGoal(); renderShots(); selectTab("wall"); show("step1"); goal.focus();
+  });
+})();
+</script>
+
+</body></html>
